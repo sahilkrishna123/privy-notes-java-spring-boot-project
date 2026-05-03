@@ -1,6 +1,7 @@
 package com.spring_security.spring_security_app.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.spring_security.spring_security_app.notes.Note;
 import jakarta.persistence.*;
 
@@ -17,6 +18,7 @@ public class User {
     private String username;
 
     @Column
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @Enumerated(EnumType.STRING)

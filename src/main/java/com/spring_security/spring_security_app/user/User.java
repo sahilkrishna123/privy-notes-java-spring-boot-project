@@ -11,8 +11,8 @@ import java.util.List;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column
     private String username;
@@ -57,7 +57,7 @@ public class User {
         this.username = username;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
@@ -70,7 +70,7 @@ public class User {
         this.password = password;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
     @Override

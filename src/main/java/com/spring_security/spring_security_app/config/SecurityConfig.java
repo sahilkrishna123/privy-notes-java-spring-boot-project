@@ -15,10 +15,15 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         return http
                 .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/create").permitAll()
-                        .requestMatchers("/notes/hello-notes").permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth ->
+                        auth
+                                .requestMatchers("/notes/hello-notes").permitAll() // specific rules first
+//                                .requestMatchers("/users/create").permitAll()
+                                .requestMatchers("/users/**").permitAll()
+                                .requestMatchers("/notes/**").permitAll()
+//                                .requestMatchers("/users/**").hasRole("ADMIN")
+//                                .requestMatchers("/notes/**").hasRole("USER")
+                            .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(Customizer.withDefaults())

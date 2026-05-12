@@ -2,6 +2,7 @@ package com.spring_security.spring_security_app.user;
 
 import com.spring_security.spring_security_app.dto.UserRequest;
 import com.spring_security.spring_security_app.dto.UserResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,25 +12,29 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/users")
+@Tag(
+        name ="User Management CRUD Operations",
+        description = "You can create, update, delete, and get user."
+)
 public class UserController {
     @Autowired
     private UserRepository repository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @GetMapping("/hello-user")
-    public String helloUser(){
-        return "Hello From User";
-    }
-
+    // Get all
     @GetMapping
     public List<User> getAll(){
         return repository.findAll();
     }
-
-
-    @PostMapping("/create")
+    // Get one
+    @GetMapping("/{username}")
+    public User getOne(@PathVariable String username){
+        return repository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+    // Create User
+    @PostMapping
     public ResponseEntity<UserResponse>  createUser(@RequestBody UserRequest request){
         User user = new User();
         user.setUsername(request.getUsername());
@@ -41,11 +46,3 @@ public class UserController {
         return ResponseEntity.status(201).body(response);
     }
 }
-
-
-//User user = new User();
-//user.setUsername("sahil");
-//user.setPassword("1234");
-//user.setRole(Role.ROLE_USER);
-//
-//userRepository.save(user);

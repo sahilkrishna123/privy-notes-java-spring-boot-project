@@ -10,21 +10,25 @@ public class Note {
     }
 
     @Id
-    @GeneratedValue
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column
+    private String title;
 
     @Column
     private String content;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -42,6 +46,14 @@ public class Note {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     @Override

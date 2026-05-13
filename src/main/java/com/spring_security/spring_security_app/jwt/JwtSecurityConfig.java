@@ -7,6 +7,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -36,18 +37,38 @@ import java.util.UUID;
 @EnableMethodSecurity
 public class JwtSecurityConfig {
 
+    // ✅ Chain 1 — Basic Auth ONLY for /authenticate
+    // Higher priority (@Order(1)) — checked first
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Order(1)
+    public SecurityFilterChain basicAuthFilterChain(HttpSecurity http) throws Exception {
+        http
+                .securityMatcher("/authenticate")       // ← applies ONLY to /authenticate
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .httpBasic(Customizer.withDefaults());  // ← Basic Auth here, isolated
+
+        return http.build();
+    }
+
+    // ✅ Chain 2 — JWT for everything else
+    // Lower priority (@Order(2)) — checked second
+    @Bean
+    @Order(2)
+    public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints — no token needed
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/authenticate").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/refresh").permitAll()   // ← was missing
-                        // Role-based protected endpoints
+                        .requestMatchers(HttpMethod.GET, "/hello").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users").hasRole("ADMIN")
                         .requestMatchers("/notes/**").hasAnyRole("ADMIN", "USER")
                         .anyRequest().authenticated()
@@ -55,15 +76,9 @@ public class JwtSecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // Required: populates Authentication from Basic Auth credentials
-                // so that /authenticate endpoint receives the Authentication object
-                .httpBasic(Customizer.withDefaults())
-                // JWT validation for all other protected routes
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
-                // Separated from oauth2ResourceServer so it only fires on truly protected routes
-                // If kept inside oauth2ResourceServer it intercepts permitAll() routes too
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

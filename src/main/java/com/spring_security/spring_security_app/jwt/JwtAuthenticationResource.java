@@ -1,5 +1,6 @@
 package com.spring_security.spring_security_app.jwt;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,6 +17,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 @RestController
+@Tag(
+        name = "User Authentication",
+        description = "User Login API: /authenticate"
+)
 public class JwtAuthenticationResource {
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;

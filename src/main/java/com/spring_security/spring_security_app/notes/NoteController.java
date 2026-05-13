@@ -2,6 +2,7 @@ package com.spring_security.spring_security_app.notes;
 
 import com.spring_security.spring_security_app.notes.dto.NoteRequest;
 import com.spring_security.spring_security_app.notes.dto.NoteResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/notes")
+@Tag(
+        name = "Notes Management",
+        description = "Create, read, update, and delete notes."
+)
 public class NoteController {
 
     @Autowired
